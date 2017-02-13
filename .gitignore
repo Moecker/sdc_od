@@ -1,0 +1,4 @@
+/project_videos/*.mp4
+/data/non-vehicles
+/data/vehicles
+/__pycache__
