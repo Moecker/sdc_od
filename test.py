@@ -8,12 +8,10 @@ import numpy as np
 import cv2
 import glob
 
-images = glob.glob("examples/*.png")
+from search_classify import *
+
+images = glob.glob("test_images/*.jpg")
 print(images)
 
 for image in images:
-    print(image)
-    img = mpimg.imread(image)
-
-    plt.imshow(img)
-    plt.show()
+    test_svm_performance(image)

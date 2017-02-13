@@ -19,16 +19,16 @@ import pickle
 from sklearn.model_selection import train_test_split
 
 color_space = 'HSV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 12  # HOG orientations
+orient = 10  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
-cell_per_block = 4 # HOG cells per block
+cell_per_block = 3 # HOG cells per block
 hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
-spatial_size = (12, 12) # Spatial binning dimensions
-hist_bins = 32    # Number of histogram bins
+spatial_size = (20, 20) # Spatial binning dimensions
+hist_bins = 40    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
-y_start_stop = [400, 720] # Min and max in y to search in slide_window()
+y_start_stop = [390, 700] # Min and max in y to search in slide_window()
 
 
 # Define a function to extract features from a single image window
@@ -207,4 +207,6 @@ def test_svm_performance(img_file):
 
     plt.imshow(window_img)
     plt.show()
-    plt.imsave("output.png", window_img)
+    root = img_file.split("\\")[-1]
+    name = root.split(".")[0] + "_processed.png"
+    plt.imsave("output_images/" + name, window_img)
