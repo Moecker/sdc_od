@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('TkAgg')
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,10 +11,24 @@ from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
 from lesson_functions import *
+import pickle
+
 # NOTE: the next import is only valid for scikit-learn version <= 0.17
 # for scikit-learn >= 0.18 use:
 # from sklearn.model_selection import train_test_split
 from sklearn.model_selection import train_test_split
+
+color_space = 'HSV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 12  # HOG orientations
+pix_per_cell = 8 # HOG pixels per cell
+cell_per_block = 4 # HOG cells per block
+hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
+spatial_size = (12, 12) # Spatial binning dimensions
+hist_bins = 32    # Number of histogram bins
+spatial_feat = True # Spatial features on or off
+hist_feat = True # Histogram features on or off
+hog_feat = True # HOG features on or off
+y_start_stop = [400, 720] # Min and max in y to search in slide_window()
 
 
 # Define a function to extract features from a single image window
@@ -99,32 +116,25 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
 
 def train_svm():    
     # Read in cars and notcars
-    images = glob.glob('data/*.png')
+    images_car = glob.glob('data/vehicles/*/*.png')
+    images_notcar = glob.glob('data/non-vehicles/*/*.png')
     cars = []
     notcars = []
-    for image in images:
-        if 'image' in image or 'extra' in image:
-            notcars.append(image)
-        else:
-            cars.append(image)
+       
+    for image in images_car:
+        cars.append(image)
+        
+    for image in images_notcar:
+        notcars.append(image)
 
+    print("Num cars :" + str(len(cars)))
+    print("Num not-cars :" + str(len(notcars)))
+    
     # Reduce the sample size because
     # The quiz evaluator times out after 13s of CPU time
     sample_size = 500
     cars = cars[0:sample_size]
     notcars = notcars[0:sample_size]
-
-    color_space = 'HLS' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-    orient = 9  # HOG orientations
-    pix_per_cell = 8 # HOG pixels per cell
-    cell_per_block = 4 # HOG cells per block
-    hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
-    spatial_size = (32, 32) # Spatial binning dimensions
-    hist_bins = 32    # Number of histogram bins
-    spatial_feat = True # Spatial features on or off
-    hist_feat = True # Histogram features on or off
-    hog_feat = True # HOG features on or off
-    y_start_stop = [500, 720] # Min and max in y to search in slide_window()
 
     car_features = extract_features(cars, color_space=color_space, 
                             spatial_size=spatial_size, hist_bins=hist_bins, 
@@ -168,16 +178,20 @@ def train_svm():
     print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
     # Check the prediction time for a single sample
     t=time.time()
+    
+    pickle.dump([svc, X_scaler], open("svc.p", "wb" ))
 
     
 def test_svm_performance(img_file):
     image = mpimg.imread(img_file)
     draw_image = np.copy(image)
+    
+    svc, X_scaler = pickle.load(open("svc.p", "rb" ))
 
     # Uncomment the following line if you extracted training
     # data from .png images (scaled 0 to 1 by mpimg) and the
     # image you are searching is a .jpg (scaled 0 to 255)
-    #image = image.astype(np.float32)/255
+    image = image.astype(np.float32)/255
 
     windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
                         xy_window=(96, 96), xy_overlap=(0.5, 0.5))
@@ -192,4 +206,5 @@ def test_svm_performance(img_file):
     window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)                    
 
     plt.imshow(window_img)
+    plt.show()
     plt.imsave("output.png", window_img)
