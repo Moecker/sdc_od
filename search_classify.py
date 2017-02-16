@@ -13,22 +13,20 @@ from skimage.feature import hog
 from lesson_functions import *
 import pickle
 
-# NOTE: the next import is only valid for scikit-learn version <= 0.17
-# for scikit-learn >= 0.18 use:
-# from sklearn.model_selection import train_test_split
 from sklearn.model_selection import train_test_split
 
-color_space = 'HSV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 10  # HOG orientations
-pix_per_cell = 8 # HOG pixels per cell
+color_space = 'HLS' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 12  # HOG orientations
+pix_per_cell = 12 # HOG pixels per cell
 cell_per_block = 3 # HOG cells per block
 hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
-spatial_size = (20, 20) # Spatial binning dimensions
-hist_bins = 40    # Number of histogram bins
+spatial_size = (32, 32) # Spatial binning dimensions
+hist_bins = 32    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
-y_start_stop = [390, 700] # Min and max in y to search in slide_window()
+y_start_stop = [390, 680] # Min and max in y to search in slide_window()
+sample_size = 8000
 
 
 # Define a function to extract features from a single image window
@@ -127,14 +125,15 @@ def train_svm():
     for image in images_notcar:
         notcars.append(image)
 
-    print("Num cars :" + str(len(cars)))
-    print("Num not-cars :" + str(len(notcars)))
+    print("Num cars: " + str(len(cars)))
+    print("Num not-cars: " + str(len(notcars)))
     
-    # Reduce the sample size because
-    # The quiz evaluator times out after 13s of CPU time
-    sample_size = 500
-    cars = cars[0:sample_size]
-    notcars = notcars[0:sample_size]
+    import random
+    cars = random.sample(cars, sample_size)
+    notcars = random.sample(notcars, sample_size)
+    
+    print("Train num cars: " + str(len(cars)))
+    print("Train num not-cars: " + str(len(notcars)))
 
     car_features = extract_features(cars, color_space=color_space, 
                             spatial_size=spatial_size, hist_bins=hist_bins, 
@@ -157,7 +156,6 @@ def train_svm():
 
     # Define the labels vector
     y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
-
 
     # Split up data into randomized training and test sets
     rand_state = np.random.randint(0, 100)
@@ -182,19 +180,30 @@ def train_svm():
     pickle.dump([svc, X_scaler], open("svc.p", "wb" ))
 
     
-def test_svm_performance(img_file):
-    image = mpimg.imread(img_file)
-    draw_image = np.copy(image)
-    
+def test_svm_performance(img_file):   
     svc, X_scaler = pickle.load(open("svc.p", "rb" ))
 
     # Uncomment the following line if you extracted training
     # data from .png images (scaled 0 to 1 by mpimg) and the
     # image you are searching is a .jpg (scaled 0 to 255)
-    image = image.astype(np.float32)/255
+    # image = image.astype(np.float32)/255
 
+    image = mpimg.imread(img_file)
+    window_img = run_svm(image, svc, X_scaler)
+
+    plt.imshow(window_img)
+    plt.show()
+    
+    root = img_file.split("\\")[-1]
+    name = root.split(".")[0] + "_processed.png"
+    plt.imsave(name, window_img)
+
+    
+def run_svm(image, svc, X_scaler):
+    draw_image = np.copy(image)
+    
     windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
-                        xy_window=(96, 96), xy_overlap=(0.5, 0.5))
+                        xy_window=(64, 64), xy_overlap=(0.5, 0.5))
 
     hot_windows = search_windows(image, windows, svc, X_scaler, color_space=color_space, 
                             spatial_size=spatial_size, hist_bins=hist_bins, 
@@ -204,9 +213,5 @@ def test_svm_performance(img_file):
                             hist_feat=hist_feat, hog_feat=hog_feat)                       
 
     window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)                    
-
-    plt.imshow(window_img)
-    plt.show()
-    root = img_file.split("\\")[-1]
-    name = root.split(".")[0] + "_processed.png"
-    plt.imsave("output_images/" + name, window_img)
+    return window_img, hot_windows
+    

@@ -2,3 +2,5 @@
 /data/non-vehicles
 /data/vehicles
 /__pycache__
+/video2images/in
+/video2images/out
