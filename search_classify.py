@@ -16,20 +16,20 @@ from sklearn.model_selection import train_test_split
 
 from lesson_functions import *
 
-color_space = 'HLS' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 12  # HOG orientations
-pix_per_cell = 12 # HOG pixels per cell
-cell_per_block = 3 # HOG cells per block
-hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
+color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 9  # HOG orientations
+pix_per_cell = 8 # HOG pixels per cell
+cell_per_block = 2 # HOG cells per block
+hog_channel = 0 # Can be 0, 1, 2, or "ALL"
 spatial_size = (32, 32) # Spatial binning dimensions
-hist_bins = 32    # Number of histogram bins
+hist_bins = 64 # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
 
-y_start_stop = [380, 660] # Min and max in y to search in slide_window()
-x_start_stop = [200, 1200] # Min and max in y to search in slide_window()
-sample_size = 1000
+y_start_stop = [370, 670] # Min and max in y to search in slide_window()
+x_start_stop = [None, None] # Min and max in y to search in slide_window()
+sample_size = 8700
 
 
 # Runs the svc chain on the given image with fiven svc classifier and scale
@@ -39,10 +39,16 @@ def run_svc(image, svc, X_scaler):
     windows_064 = slide_window(image, 
                                x_start_stop=x_start_stop, 
                                y_start_stop=y_start_stop,
-                               xy_window=(64, 64), 
+                               xy_window=(80, 80), 
                                xy_overlap=(0.5, 0.5))
+                               
+    windows_128 = slide_window(image, 
+                               x_start_stop=x_start_stop, 
+                               y_start_stop=y_start_stop,
+                               xy_window=(120, 120), 
+                               xy_overlap=(0.5, 0.5))  
                             
-    windows = windows_064 # + windows_096 + windows_128
+    windows = windows_064 + windows_128
       
     # Search for "hot" windows where a car could be located
     hot_windows = search_windows(image,

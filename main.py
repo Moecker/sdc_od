@@ -21,8 +21,10 @@ svc, X_scaler = pickle.load(open("svc.p", "rb" ))
 # Keeps track of all detected bboxes
 all_bboxes = []
 
-kRequiredOccurences = 3
-kKeepBoxesIterations = 5
+kRequiredOccurences = 2
+kKeepBoxesIterations = 4
+
+index = 0
 
 # The main entry point when calling the script
 def main():
@@ -47,8 +49,8 @@ def process_video():
     out_filename = "./project_videos/" + file + "_processed.mp4"
     log.info("Writing file " + out_filename)
     
-    output_clip = clip.subclip(25, 35).fl_image(process_image)
-    # output_clip = clip.fl_image(process_image)
+    # output_clip = clip.subclip(37, 40).fl_image(process_image)
+    output_clip = clip.fl_image(process_image)
     
     output_clip.write_videofile(out_filename, audio=False)
 
@@ -61,7 +63,13 @@ def process_image(image, frame_name=""):
     
     # Call the sophisticated heatmap chain which runs the svc and keeps track
     # of previously detected bboxes
-    window_img, unused_heatmap_image = process_heat(image)
+    # window_img, unused_heatmap_image = process_heat(image)
+    window_img = image
+    
+    global index
+    if ((index % 20) == 0):
+        plt.imsave("img_" + str(index), window_img)
+    index += 1
     
     # Rescale the image
     window_img = window_img.astype(np.float32) * 255.0

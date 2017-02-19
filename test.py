@@ -19,7 +19,12 @@ from heatmap import *
 index = 0
 
 
-def make_heat():
+def main():
+    # train_svc()
+    # test_images()
+    test_video_images()
+    
+def test_make_heat():
     heatmap = apply_threshold(heatmap, 2)
     labels = label(heatmap)
     print(labels[1], 'cars found')
@@ -50,7 +55,7 @@ def test_chain():
     
 
 def test_images():
-    images = glob.glob("test_images/*.jpg")
+    images = glob.glob("own_tests/*.png")
     print(images)
 
     for image in images:
@@ -58,18 +63,18 @@ def test_images():
      
      
 def test_video_images():
-    images = glob.glob("video2images/in/*.png")
+    images = glob.glob("video2images/all/*.png")
     log.info("Number of images: " + str(len(images)))
 
     svc, X_scaler = pickle.load(open("svc.p", "rb" ))
     
     for image_file in images:
-        image = mpimg.imread(img_file)
-        window_img = run_svc(image, svc, X_scaler)
+        image = mpimg.imread(image_file)
+        window_img, windows = run_svc(image, svc, X_scaler)
         
         root = image_file.split("\\")[-1]
         name = root.split(".")[0] + "_processed.png"
-        plt.imsave("video2images/out/" + name, window_img)
+        plt.imsave("video2images/all_out/" + name, window_img)
         
     
 def test_train_classifier():
@@ -80,7 +85,7 @@ def test_train_classifier():
 
 
 def test_run_with_heat():
-    images = glob.glob("video2images/in/*10*.png")
+    images = glob.glob("video2images/all/*.png")
     images = sorted(images)
     for image_file in images:
         image = mpimg.imread(image_file)
@@ -89,34 +94,34 @@ def test_run_with_heat():
         
         root = image_file.split("\\")[-1]
         name = root.split(".")[0] + "_processed.png"
-        # plt.imsave("video2images/out/" + name, image_with_windows)
-        # plt.imsave("video2images/out/" + "heat_" + name, heat_window)
+
+        plt.imsave("video2images/all_out_heat/" + "heat_" + name, image_with_windows)
        
         gray_image = cv2.cvtColor(image_with_windows, cv2.COLOR_RGB2GRAY)
         float_heat = heat_window.astype(np.float32)
         
-        combined = cv2.addWeighted(gray_image, 1, float_heat, 0.5, 1)
+        # combined = cv2.addWeighted(gray_image, 1, float_heat, 0.5, 1)
         # plt.imshow(combined, cmap="gray")
-        plt.imshow(image_with_windows)
-        plt.show()
+        # plt.imshow(image_with_windows)
+        # plt.show()
 
 
 def test_svc_performance(img_file):   
     svc, X_scaler = pickle.load(open("svc.p", "rb" ))
 
-    # Uncomment the following line if you extracted training
-    # data from .png images (scaled 0 to 1 by mpimg) and the
-    # image you are searching is a .jpg (scaled 0 to 255)
-    # image = image.astype(np.float32)/255
-
     image = mpimg.imread(img_file)
-    window_img = run_svc(image, svc, X_scaler)
+    window_img, windows = run_svc(image, svc, X_scaler)
 
     plt.imshow(window_img)
     plt.show()
+    
+    print(windows)
     
     root = img_file.split("\\")[-1]
     name = root.split(".")[0] + "_processed.png"
     plt.imsave(name, window_img)
         
-        
+
+if __name__ == "__main__":
+    # Call the main routine
+    main()
