@@ -19,12 +19,42 @@ from heatmap import *
 index = 0
 
 
+def make_heat():
+    heatmap = apply_threshold(heatmap, 2)
+    labels = label(heatmap)
+    print(labels[1], 'cars found')
+    plt.imshow(labels[0], cmap='gray')
+
+    
+def test_heat():    
+    # Read in the last image above
+    image = mpimg.imread('img105.jpg')
+    # Draw bounding boxes on a copy of the image
+    draw_img = draw_labeled_bboxes(np.copy(image), labels)
+    # Display the image
+    plt.imshow(draw_img)
+
+    heatmap = np.zeros_like(image[:,:,0]).astype(np.float)
+
+    for idx, boxlist in enumerate(bboxes):
+        pass
+        
+    final_map = np.clip(heat - 2, 100, 100)
+    plt.imshow(final_map, cmap='hot')   
+
+   
+def test_chain():    
+    image = mpimg.imread('test_images/bbox-example-image.jpg')
+    bboxes = np.array([((100, 100), (250, 200)), ((120, 100), (230, 210)), ((80, 100), (180, 220)),((100, 100), (250, 200)), ((120, 100), (230, 210)), ((80, 100), (180, 220))]) 
+    apply_heat(image, bboxes)
+    
+
 def test_images():
     images = glob.glob("test_images/*.jpg")
     print(images)
 
     for image in images:
-        test_svm_performance(image)
+        test_svc_performance(image)
      
      
 def test_video_images():
@@ -35,52 +65,23 @@ def test_video_images():
     
     for image_file in images:
         image = mpimg.imread(img_file)
-        window_img = run_svm(image, svc, X_scaler)
+        window_img = run_svc(image, svc, X_scaler)
         
         root = image_file.split("\\")[-1]
         name = root.split(".")[0] + "_processed.png"
         plt.imsave("video2images/out/" + name, window_img)
         
-     
-def process_video():
-    log.info("Running video ...")
+    
+def test_train_classifier():
+    train_svc()
 
-    from moviepy.editor import VideoFileClip
-
-    file = "project_video"
-    
-    in_filename = "./project_videos/" + file + ".mp4"
-    log.info("Loading file " + in_filename)
-    clip = VideoFileClip(in_filename)
-    
-    out_filename = "./project_videos/" + file + "_processed.mp4"
-    log.info("Writing file " + out_filename)
-    
-    output_clip = clip.subclip(30, 40).fl_image(process_image)
-    output_clip.write_videofile(out_filename, audio=False)
-    
-    
-def process_image(image, frame_name=""): 
-    image = image.astype(np.float32)/255.0
-    
-    # window_img = run_svm(image, svc, X_scaler)
-    window_img, dummy = process_heat(image)
-    
-    window_img = window_img.astype(np.float32)*255.0
-    
-    return window_img
-   
-   
-def train_classifier():
-    train_svm()
-
-    test_svm_performance("test_images/bbox-example-image.png")
-    test_svm_performance("test_images/img_001.png")    
+    test_svc_performance("test_images/bbox-example-image.png")
+    test_svc_performance("test_images/img_001.png")    
 
 
-def run_with_heat():
-    images = glob.glob("video2images/in/*.png")
-    
+def test_run_with_heat():
+    images = glob.glob("video2images/in/*10*.png")
+    images = sorted(images)
     for image_file in images:
         image = mpimg.imread(image_file)
         
@@ -88,35 +89,34 @@ def run_with_heat():
         
         root = image_file.split("\\")[-1]
         name = root.split(".")[0] + "_processed.png"
-        plt.imsave("video2images/out/" + name, image_with_windows)
-        plt.imsave("video2images/out/" + "heat_" + name, heat_window)
-               
+        # plt.imsave("video2images/out/" + name, image_with_windows)
+        # plt.imsave("video2images/out/" + "heat_" + name, heat_window)
+       
+        gray_image = cv2.cvtColor(image_with_windows, cv2.COLOR_RGB2GRAY)
+        float_heat = heat_window.astype(np.float32)
         
-def process_heat(image):
-    occurences = 4
-    allowance = 6
+        combined = cv2.addWeighted(gray_image, 1, float_heat, 0.5, 1)
+        # plt.imshow(combined, cmap="gray")
+        plt.imshow(image_with_windows)
+        plt.show()
+
+
+def test_svc_performance(img_file):   
+    svc, X_scaler = pickle.load(open("svc.p", "rb" ))
+
+    # Uncomment the following line if you extracted training
+    # data from .png images (scaled 0 to 1 by mpimg) and the
+    # image you are searching is a .jpg (scaled 0 to 255)
+    # image = image.astype(np.float32)/255
+
+    image = mpimg.imread(img_file)
+    window_img = run_svc(image, svc, X_scaler)
+
+    plt.imshow(window_img)
+    plt.show()
     
-    window_img, bboxes = run_svm(image, svc, X_scaler)
-
-    all_bboxes.append(bboxes)
-   
-    if len(all_bboxes) >= allowance:
-        all_bboxes.remove(all_bboxes[0])
-                
-    all_boxes_tuples = []
-    for boxes in all_bboxes:
-        all_boxes_tuples = all_boxes_tuples + boxes
-     
-    image_with_windows, heat_window = apply_heat(image, all_boxes_tuples, occurences)
-    
-    return image_with_windows, heat_window
-
-svc, X_scaler = pickle.load(open("svc.p", "rb" ))
-
-# train_classifier()
-# test_video_images()
-# process_video()
-# run_with_heat()
-
-all_bboxes = []
-process_video()
+    root = img_file.split("\\")[-1]
+    name = root.split(".")[0] + "_processed.png"
+    plt.imsave(name, window_img)
+        
+        

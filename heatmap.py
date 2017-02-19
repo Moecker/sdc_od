@@ -3,8 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 from scipy.ndimage.measurements import label
+import logging as log
 
 
+# Draw the labels as boxes on the image
 def draw_labeled_bboxes(img, labels):
     # Iterate through all detected cars
     for car_number in range(1, labels[1]+1):
@@ -42,33 +44,24 @@ def apply_threshold(heatmap, threshold):
     # Return thresholded map
     return heatmap
 
-
-def test_heat():    
-    # Read in the last image above
-    image = mpimg.imread('img105.jpg')
-    # Draw bounding boxes on a copy of the image
-    draw_img = draw_labeled_bboxes(np.copy(image), labels)
-    # Display the image
-    plt.imshow(draw_img)
-
-    heatmap = np.zeros_like(image[:,:,0]).astype(np.float)
-
-    for idx, boxlist in enumerate(bboxes):
-        pass
-        
-    final_map = np.clip(heat - 2, 100, 100)
-    plt.imshow(final_map, cmap='hot')
-
     
 def apply_heat(image, bboxes, occurences):
     heatmap = np.zeros_like(image[:,:,0]).astype(np.float)
     
     heatmap = add_heat(heatmap, bboxes)
+    
+    # plt.imshow(heatmap, cmap='hot')
+    # plt.show()
+    
+    max_occurences = np.max(heatmap) * 0.8
+    
     heatmap = apply_threshold(heatmap, occurences)
 
     labels = label(heatmap)
 
-    print(labels[1], 'car(s) found')
+    print("")
+    log.info(str(labels[1]) + ' car(s) found')
+    
     # plt.imshow(labels[0], cmap='gray')
     # plt.show()
     
@@ -76,20 +69,10 @@ def apply_heat(image, bboxes, occurences):
     draw_img = draw_labeled_bboxes(np.copy(image), labels)
 
     final_map = np.clip(heatmap, 0, 255)
+    
     # plt.imshow(final_map, cmap='hot')
     # plt.show()
+    
     return draw_img, final_map
 
-        
-def make_heat():
-    heatmap = apply_threshold(heatmap, 2)
-    labels = label(heatmap)
-    print(labels[1], 'cars found')
-    plt.imshow(labels[0], cmap='gray')
-
-    
-def test_chain():    
-    image = mpimg.imread('test_images/bbox-example-image.jpg')
-    bboxes = np.array([((100, 100), (250, 200)), ((120, 100), (230, 210)), ((80, 100), (180, 220)),((100, 100), (250, 200)), ((120, 100), (230, 210)), ((80, 100), (180, 220))]) 
-    apply_heat(image, bboxes)
     

@@ -5,28 +5,37 @@ from skimage.feature import hog
 
 
 # Define a function to return HOG features and visualization
-def get_hog_features(img, orient, pix_per_cell, cell_per_block, 
-                        vis=False, feature_vec=True):
+def get_hog_features(img,
+                     orient,
+                     pix_per_cell,
+                     cell_per_block,
+                     vis,
+                     feature_vec):
     # Call with two outputs if vis==True
     if vis == True:
-        features, hog_image = hog(img, orientations=orient, 
+        features, hog_image = hog(img,
+                                 orientations=orient, 
                                   pixels_per_cell=(pix_per_cell, pix_per_cell),
                                   cells_per_block=(cell_per_block, cell_per_block), 
                                   transform_sqrt=True, 
-                                  visualise=vis, feature_vector=feature_vec)
+                                  visualise=vis,
+                                  feature_vector=feature_vec)
+                                  
         return features, hog_image
     # Otherwise call with one output
     else:      
-        features = hog(img, orientations=orient, 
+        features = hog(img,
+                       orientations=orient, 
                        pixels_per_cell=(pix_per_cell, pix_per_cell),
                        cells_per_block=(cell_per_block, cell_per_block), 
                        transform_sqrt=True, 
                        visualise=vis, feature_vector=feature_vec)
+                       
         return features
 
         
 # Define a function to compute binned color features  
-def bin_spatial(img, size=(32, 32)):
+def bin_spatial(img, size):
     # Use cv2.resize().ravel() to create the feature vector
     features = cv2.resize(img, size).ravel() 
     # Return the feature vector
@@ -34,12 +43,12 @@ def bin_spatial(img, size=(32, 32)):
 
     
 # Define a function to compute color histogram features 
-# NEED TO CHANGE bins_range if reading .png files with mpimg!
-def color_hist(img, nbins=32, bins_range=(0, 1)):
+def color_hist(img, nbins, bins_range):
     # Compute the histogram of the color channels separately
     channel1_hist = np.histogram(img[:,:,0], bins=nbins, range=bins_range)
     channel2_hist = np.histogram(img[:,:,1], bins=nbins, range=bins_range)
     channel3_hist = np.histogram(img[:,:,2], bins=nbins, range=bins_range)
+    
     # Concatenate the histograms into a single feature vector
     hist_features = np.concatenate((channel1_hist[0], channel2_hist[0], channel3_hist[0]))
     # Return the individual histograms, bin_centers and feature vector
@@ -48,10 +57,17 @@ def color_hist(img, nbins=32, bins_range=(0, 1)):
     
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
-def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
-                        hist_bins=32, orient=9, 
-                        pix_per_cell=8, cell_per_block=2, hog_channel=0,
-                        spatial_feat=True, hist_feat=True, hog_feat=True):
+def extract_features(imgs,
+                     color_space,
+                     spatial_size,
+                     hist_bins,
+                     orient, 
+                     pix_per_cell,
+                     cell_per_block,
+                     hog_channel,
+                     spatial_feat,
+                     hist_feat,
+                     hog_feat):
     # Create a list to append feature vectors to
     features = []
     # Iterate through the list of images
@@ -74,11 +90,14 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
         else: feature_image = np.copy(image)      
 
         if spatial_feat == True:
-            spatial_features = bin_spatial(feature_image, size=spatial_size)
+            spatial_features = bin_spatial(feature_image,
+                                           size=spatial_size)
             file_features.append(spatial_features)
         if hist_feat == True:
             # Apply color_hist()
-            hist_features = color_hist(feature_image, nbins=hist_bins)
+            hist_features = color_hist(feature_image,
+                                       nbins=hist_bins,
+                                       bins_range=(0, 1))
             file_features.append(hist_features)
         if hog_feat == True:
         # Call get_hog_features() with vis=False, feature_vec=True
@@ -86,12 +105,19 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
                 hog_features = []
                 for channel in range(feature_image.shape[2]):
                     hog_features.append(get_hog_features(feature_image[:,:,channel], 
-                                        orient, pix_per_cell, cell_per_block, 
-                                        vis=False, feature_vec=True))
+                                        orient,
+                                        pix_per_cell,
+                                        cell_per_block, 
+                                        vis=False,
+                                        feature_vec=True))
                 hog_features = np.ravel(hog_features)        
             else:
-                hog_features = get_hog_features(feature_image[:,:,hog_channel], orient, 
-                            pix_per_cell, cell_per_block, vis=False, feature_vec=True)
+                hog_features = get_hog_features(feature_image[:,:,hog_channel],
+                                                orient, 
+                                                pix_per_cell,
+                                                cell_per_block,
+                                                vis=False,
+                                                feature_vec=True)
             # Append the new feature vector to the features list
             file_features.append(hog_features)
         features.append(np.concatenate(file_features))
@@ -103,8 +129,11 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
 # start and stop positions in both x and y, 
 # window size (x and y dimensions),  
 # and overlap fraction (for both x and y)
-def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None], 
-                    xy_window=(32, 32), xy_overlap=(0.5, 0.5)):
+def slide_window(img,
+                 y_start_stop,
+                 xy_window,
+                 xy_overlap,
+                 x_start_stop=[None, None]):
     # If x and/or y start/stop positions not defined, set to image size
     if x_start_stop[0] == None:
         x_start_stop[0] = 0
@@ -131,11 +160,15 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     # classifier, so looping makes sense
     for ys in range(ny_windows):
         for xs in range(nx_windows):
+        
+            x_window = xy_window[0]
+            y_window = xy_window[1]
+            
             # Calculate window position
             startx = xs*nx_pix_per_step + x_start_stop[0]
-            endx = startx + xy_window[0]
+            endx = startx + x_window
             starty = ys*ny_pix_per_step + y_start_stop[0]
-            endy = starty + xy_window[1]
+            endy = starty + y_window
             
             # Append window position to list
             window_list.append(((startx, starty), (endx, endy)))
@@ -144,7 +177,7 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
 
     
 # Define a function to draw bounding boxes
-def draw_boxes(img, bboxes, color=(100, 100, 255), thick=6):
+def draw_boxes(img, bboxes, color, thick):
     # Make a copy of the image
     imcopy = np.copy(img)
     # Iterate through the bounding boxes
@@ -153,3 +186,5 @@ def draw_boxes(img, bboxes, color=(100, 100, 255), thick=6):
         cv2.rectangle(imcopy, bbox[0], bbox[1], color, thick)
     # Return the image copy with boxes drawn
     return imcopy
+
+    
