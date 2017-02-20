@@ -21,8 +21,8 @@ svc, X_scaler = pickle.load(open("svc.p", "rb" ))
 # Keeps track of all detected bboxes
 all_bboxes = []
 
-kRequiredOccurences = 2
-kKeepBoxesIterations = 4
+kRequiredOccurences = 16
+kKeepBoxesIterations = 10
 
 index = 0
 
@@ -63,13 +63,16 @@ def process_image(image, frame_name=""):
     
     # Call the sophisticated heatmap chain which runs the svc and keeps track
     # of previously detected bboxes
-    # window_img, unused_heatmap_image = process_heat(image)
-    window_img = image
+    window_img, unused_heatmap_image = process_heat(image)
     
-    global index
-    if ((index % 20) == 0):
-        plt.imsave("img_" + str(index), window_img)
-    index += 1
+    debug = False
+    if (debug):
+        window_img = image
+        
+        global index
+        if ((index % 20) == 0):
+            plt.imsave("img_" + str(index), window_img)
+        index += 1
     
     # Rescale the image
     window_img = window_img.astype(np.float32) * 255.0

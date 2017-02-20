@@ -35,20 +35,11 @@ sample_size = 8700
 # Runs the svc chain on the given image with fiven svc classifier and scale
 def run_svc(image, svc, X_scaler):
     draw_image = np.copy(image)
-                                                    
-    windows_064 = slide_window(image, 
-                               x_start_stop=x_start_stop, 
-                               y_start_stop=y_start_stop,
-                               xy_window=(80, 80), 
-                               xy_overlap=(0.5, 0.5))
-                               
-    windows_128 = slide_window(image, 
-                               x_start_stop=x_start_stop, 
-                               y_start_stop=y_start_stop,
-                               xy_window=(120, 120), 
-                               xy_overlap=(0.5, 0.5))  
-                            
-    windows = windows_064 + windows_128
+    
+    windows = []
+    for size in range(70, 140, 20):
+        wins = slide_window(image, x_start_stop=x_start_stop, y_start_stop=y_start_stop, xy_window=(size, size), xy_overlap=(0.5, 0.5))  
+        windows = windows + wins                
       
     # Search for "hot" windows where a car could be located
     hot_windows = search_windows(image,
