@@ -21,8 +21,11 @@ svc, X_scaler = pickle.load(open("svc.p", "rb" ))
 # Keeps track of all detected bboxes
 all_bboxes = []
 
-kRequiredOccurences = 12
-kKeepBoxesIterations = 15
+kRequiredOccurences = 30
+kKeepBoxesIterations = 20
+
+# kRequiredOccurences = 28
+# kKeepBoxesIterations = 20
 
 index = 0
 
@@ -49,7 +52,9 @@ def process_video():
     out_filename = "./project_videos/" + file + "_processed.mp4"
     log.info("Writing file " + out_filename)
     
-    # output_clip = clip.subclip(20, 30).fl_image(process_image)
+    # output_clip = clip.subclip(15, 17).fl_image(process_image)
+    # output_clip = clip.subclip(37, 40).fl_image(process_image)
+    # output_clip = clip.subclip(43, 45).fl_image(process_image)
     output_clip = clip.fl_image(process_image)
     
     output_clip.write_videofile(out_filename, audio=False)

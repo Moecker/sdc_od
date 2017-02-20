@@ -37,7 +37,7 @@ def run_svc(image, svc, X_scaler):
     draw_image = np.copy(image)
     
     windows = []
-    for size in range(70, 140, 20):
+    for size in range(60, 140, 20):
         wins = slide_window(image, x_start_stop=x_start_stop, y_start_stop=y_start_stop, xy_window=(size, size), xy_overlap=(0.5, 0.5))  
         windows = windows + wins                
       

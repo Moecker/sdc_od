@@ -1,9 +1,4 @@
-##Writeup Template
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
-**Vehicle Detection Project**
+# Vehicle Detection Project
 
 The goals / steps of this project are the following:
 
@@ -15,22 +10,20 @@ The goals / steps of this project are the following:
 * Estimate a bounding box for vehicles detected.
 
 [//]: # (Image References)
-[image1]: ./examples/car_not_car.png
-[image2]: ./examples/HOG_example.jpg
-[image3]: ./examples/sliding_windows.jpg
-[image4]: ./examples/sliding_window.jpg
-[image5]: ./examples/bboxes_and_heat.png
-[image6]: ./examples/labels_map.png
-[image7]: ./examples/output_bboxes.png
-[video1]: ./project_video.mp4
+[car_nocar]: ./output_images/car_nocar.png
+[spatial]: ./output_images/spatial.png
+[colorhist]: ./output_images/colorhist.png
+[hog]: ./output_images/hog.png
+[hog_colorspace]: ./output_images/hog_colorspace.png
+[project_video_processed]: ./project_videos/project_video_processed.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
-###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
 ---
 ###Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf. [Here](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
 
 You're reading it!
 
@@ -38,22 +31,47 @@ You're reading it!
 
 ####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+This step was approached two fold: Since the choice of parameters requires a deep insight into the behavior based on various combinations, an [exploration.ipynb](Exploration) jupyter notebook was setup. In addition, ressources found on Medium, in particular https://medium.com/@mohankarthik/feature-extraction-for-vehicle-detection-using-hog-d99354a84d10#.htp17z4pe, helped a lot to decide on best color space, and the whole set of to-be-chosen parameters. A third colon was quick and dirty implemented tests found in [test.py](test.py) which helped to get started right away with the provided code from the lectures.
 
-I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
+The dataset provided contains 
+* INFO:root:Number of cars: 8792
+* INFO:root:Number of notcars: 8968
 
-![alt text][image1]
+An example of a `vehicle` class and `non-vehicle` class image is provided as follows:
+![alt text][car_nocar]
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+The images are of shape 
+* Shape of a car (64, 64, 3)
+* Shape of a notcar (64, 64, 3)
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+and its values range from
+* Min/Max of a car 0.988235 0.121569
+* Min/Max of a notcar 0.839216 0.227451and min/max 
+which is essentially [0, 1].
 
+I then applied all three possible feature extraction methods
+* Spatial Bin Features,
+* Hist Color Features and
+* HOG Features
+on the test image to get a feeling what these feature extraction methods provide. Initially I used the RGB color space but experimented also for most other channels, which is elaborated in the next section.
 
-![alt text][image2]
+This is the "Spatial Bin Features" for a car (left) and a non-car (right)
+![alt text][spatial]
+
+This is the "Hist Color Features" for a car (left) and a non-car (right)
+![alt text][colorhist]
+
+This is the "HOG Features" for a car (left) and a non-car (right)
+![alt text][hog]
 
 ####2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and...
+I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`). I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+
+Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)` as suggested by the lectures for a car (above line) and a non-car (bottom line):
+![alt text][hog_colorspace]
+
+It can be observed that in particular the first Y-channel of the YCrCb color space reveals a great feature set for the cars shape. It can also be observed that the car features differ significally from the non-car features.
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
@@ -77,7 +95,7 @@ Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spat
 ### Video Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result][project_video_processed_final]
 
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
