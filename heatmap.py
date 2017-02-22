@@ -1,3 +1,6 @@
+# This file contains code based on the quizzes for the
+# implementation of the heatmap approach.
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,8 +24,9 @@ def draw_labeled_bboxes(img, labels):
         cv2.rectangle(img, bbox[0], bbox[1], (1,0,0), 6)
     # Return the image
     return img
-    
-    
+
+
+# Adds +1 for each detected box in the box list to the heatmap
 def add_heat(heatmap, bbox_list):
     # Iterate through list of bboxes
     for box in bbox_list:
@@ -32,19 +36,21 @@ def add_heat(heatmap, bbox_list):
 
     # Return updated heatmap
     return heatmap
-    
-    
+
+
+# Applies a given treshold to the heatmap
 def apply_threshold(heatmap, threshold):
     # Zero out pixels below the threshold
     heatmap[heatmap <= threshold] = 0
-    
+
     # Return thresholded map
     return heatmap
 
-    
+
+# Applies the heat to the given image an returns the heatmap and clipped image    
 def apply_heat(image, bboxes, occurences):
     heatmap = np.zeros_like(image[:,:,0]).astype(np.float)
-    
+
     heatmap = add_heat(heatmap, bboxes)
     heatmap = apply_threshold(heatmap, occurences)
 
@@ -52,12 +58,12 @@ def apply_heat(image, bboxes, occurences):
 
     print("")
     log.info(str(labels[1]) + ' car(s) found')
-    
+
     # Draw bounding boxes on a copy of the image
     draw_img = draw_labeled_bboxes(np.copy(image), labels)
 
     final_map = np.clip(heatmap, 0, 255)
-    
+
     debug = False
     if (debug):
         plt.imshow(heatmap, cmap='hot')
@@ -66,7 +72,6 @@ def apply_heat(image, bboxes, occurences):
         plt.show()
         plt.imshow(final_map, cmap='hot')
         plt.show()
-    
+
     return draw_img, final_map
 
-    

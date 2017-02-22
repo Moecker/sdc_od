@@ -1,3 +1,6 @@
+# This file holds methods to classify images, train the SVC
+# as well as implements the sliding window approach
+
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.image as mpimg
@@ -16,6 +19,7 @@ from sklearn.model_selection import train_test_split
 
 from lesson_functions import *
 
+# The parameters used for the feature extraction methods
 color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
 orient = 9  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
@@ -27,6 +31,7 @@ spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
 
+# Parameters used for the sliding window methods
 y_start_stop = [370, 670] # Min and max in y to search in slide_window()
 x_start_stop = [None, None] # Min and max in y to search in slide_window()
 sample_size = 8700
@@ -36,6 +41,7 @@ sample_size = 8700
 def run_svc(image, svc, X_scaler):
     draw_image = np.copy(image)
     
+    # Here we create five sliding window sizes
     windows = []
     for size in range(60, 140, 20):
         wins = slide_window(image,

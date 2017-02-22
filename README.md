@@ -19,7 +19,9 @@ The goals / steps of this project are the following:
 [hog_colorspace]: ./output_images/hog_colorspace.png
 [hog_hsv]: ./output_images/hog_hsv.png
 [hasv_ycrcb]: ./output_images/hasv_ycrcb.png
+
 [project_video_processed]: ./project_videos/project_video_processed.mp4
+[test_video_processed]: ./project_videos/test_video_processed.mp4
 
 [good1]: ./output_images/good_img_260_processed.png
 [good2]: ./output_images/good_img_620_processed.png
@@ -206,7 +208,8 @@ Ultimately I searched on five scales using YCrCb 1-channel HOG (the Y-channel) f
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are OK as long as you are identifying the vehicles most of the time with minimal false positives.)
 
-Here's a [link to my video result][project_video_processed]
+* Here's a [link to my project video result][project_video_processed]
+* Here's a [link to my test video result][test_video_processed]
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
