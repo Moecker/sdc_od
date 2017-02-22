@@ -19,7 +19,7 @@ The goals / steps of this project are the following:
 [hog_colorspace]: ./output_images/hog_colorspace.png
 [hog_hsv]: ./output_images/hog_hsv.png
 [hasv_ycrcb]: ./output_images/hasv_ycrcb.png
-[project_video_processed_final]: ./project_videos/project_video_processed_final.mp4
+[project_video_processed]: ./project_videos/project_video_processed.mp4
 
 [good1]: ./output_images/good_img_260_processed.png
 [good2]: ./output_images/good_img_620_processed.png
@@ -147,7 +147,7 @@ To check the performance, I observed not just the SVC classification error but a
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVC implemented in the [search_classify.py](search_classify) file within method `train_svc`. The sklearn package already provides a rich API for SVM/SVCs. Training is performed in following steps:
+I trained a linear SVC implemented in the [search_classify](search_classify.py) file within method `train_svc`. The sklearn package already provides a rich API for SVM/SVCs. Training is performed in following steps:
 * All training examples (cars and non-cars) are loaded. We do not have to care about memory issues here and can load all images at once, since the dataset is considerable "small" compared to other ML datasets and comprises a total of about 15k samples).
 * Samples are randomized to prevent from training a certain dataset order.
 * Features for both classes are extracted using the very same parameters. The extraction method is implemented in `extract_features` in the file [lesson_functions.py](lesson_functions). Note that most code from this file is directly taken from the lecture quizzes since it is well tested and implemented and not to complex to not understand.
@@ -155,7 +155,7 @@ I trained a linear SVC implemented in the [search_classify.py](search_classify) 
 * Finally the `svc.fit(X_train, y_train)` method is invoked which trains the SVC.
 * Eventually the trained SVC and the Scaler are saved to a pickle file for later reuse.
 
-The `extract_features` method first converts the image into the desired color space and essentially calls all three possible feature extractors - if activated. All extracted features are concatenated to a big feature vector which is fed into the training SVC. Those methods are implemented in the [lesson_functions.py](lesson_functions) file:
+The `extract_features` method first converts the image into the desired color space and essentially calls all three possible feature extractors - if activated. All extracted features are concatenated to a big feature vector which is fed into the training SVC. Those methods are implemented in the [lesson_functions](lesson_functions.py) file:
 * `get_hog_features`
 * `bin_spatial`
 * `color_hist`
