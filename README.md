@@ -150,7 +150,7 @@ To check the performance, I observed not just the SVC classification error but a
 I trained a linear SVC implemented in the [search_classify](search_classify.py) file within method `train_svc`. The sklearn package already provides a rich API for SVM/SVCs. Training is performed in following steps:
 * All training examples (cars and non-cars) are loaded. We do not have to care about memory issues here and can load all images at once, since the dataset is considerable "small" compared to other ML datasets and comprises a total of about 15k samples).
 * Samples are randomized to prevent from training a certain dataset order.
-* Features for both classes are extracted using the very same parameters. The extraction method is implemented in `extract_features` in the file [lesson_functions.py](lesson_functions). Note that most code from this file is directly taken from the lecture quizzes since it is well tested and implemented and not to complex to not understand.
+* Features for both classes are extracted using the very same parameters. The extraction method is implemented in `extract_features` in the file [lesson_functions](lesson_functions.py). Note that most code from this file is directly taken from the lecture quizzes since it is well tested and implemented and not to complex to not understand.
 * Next, the features are normalized using the `StandardScaler` also from the `sklearn` package to avoid certain features to superimpose others.
 * Finally the `svc.fit(X_train, y_train)` method is invoked which trains the SVC.
 * Eventually the trained SVC and the Scaler are saved to a pickle file for later reuse.
@@ -206,7 +206,7 @@ Ultimately I searched on five scales using YCrCb 1-channel HOG (the Y-channel) f
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are OK as long as you are identifying the vehicles most of the time with minimal false positives.)
 
-Here's a [link to my video result][project_video_processed.mp4]
+Here's a [link to my video result][project_video_processed]
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
