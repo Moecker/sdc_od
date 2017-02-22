@@ -22,7 +22,8 @@ index = 0
 def main():
     # train_svc()
     # test_images()
-    test_video_images()
+    # test_video_images()
+    test_run_with_heat()
     
 def test_make_heat():
     heatmap = apply_threshold(heatmap, 2)
@@ -85,25 +86,37 @@ def test_train_classifier():
 
 
 def test_run_with_heat():
+    svc, X_scaler = pickle.load(open("svc.p", "rb" ))
+
     images = glob.glob("video2images/all/*.png")
     images = sorted(images)
     for image_file in images:
         image = mpimg.imread(image_file)
         
-        image_with_windows, heat_window = process_heat(image)
+        kRequiredOccurences = 0
+        
+        window_img, windows = run_svc(image, svc, X_scaler)
+        image_with_windows, heat_window = apply_heat(image, windows, kRequiredOccurences)
         
         root = image_file.split("\\")[-1]
         name = root.split(".")[0] + "_processed.png"
 
-        plt.imsave("video2images/all_out_heat/" + "heat_" + name, image_with_windows)
-       
-        gray_image = cv2.cvtColor(image_with_windows, cv2.COLOR_RGB2GRAY)
-        float_heat = heat_window.astype(np.float32)
+        plt.imsave("video2images/all_out_heat/" + "heat_all_" + name, window_img)
+        plt.imsave("video2images/all_out_heat/" + "heat_result" + name, image_with_windows)
+        plt.imsave("video2images/all_out_heat/" + "heat_map_" + name, heat_window)
         
-        # combined = cv2.addWeighted(gray_image, 1, float_heat, 0.5, 1)
-        # plt.imshow(combined, cmap="gray")
-        # plt.imshow(image_with_windows)
-        # plt.show()
+        final_map = np.clip(heat_window, 0, 1)
+        plt.imsave("video2images/all_out_heat/" + "heat_clip_gray_" + name, final_map)
+       
+        # Some debug output
+        debug = False
+        if (debug):
+            gray_image = cv2.cvtColor(image_with_windows, cv2.COLOR_RGB2GRAY)
+            float_heat = heat_window.astype(np.float32)
+            combined = cv2.addWeighted(gray_image, 1, float_heat, 0.5, 1)
+            plt.imshow(combined, cmap="gray")
+            plt.imshow(image_with_windows)
+            plt.show()
 
 
 def test_svc_performance(img_file):   

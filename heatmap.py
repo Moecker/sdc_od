@@ -36,9 +36,6 @@ def add_heat(heatmap, bbox_list):
     
 def apply_threshold(heatmap, threshold):
     # Zero out pixels below the threshold
-    # print(len(heatmap[heatmap <= threshold]))
-    # print(len(heatmap[heatmap <= 1]))
-    
     heatmap[heatmap <= threshold] = 0
     
     # Return thresholded map
@@ -49,12 +46,6 @@ def apply_heat(image, bboxes, occurences):
     heatmap = np.zeros_like(image[:,:,0]).astype(np.float)
     
     heatmap = add_heat(heatmap, bboxes)
-    
-    # plt.imshow(heatmap, cmap='hot')
-    # plt.show()
-    
-    max_occurences = np.max(heatmap) * 0.8
-    
     heatmap = apply_threshold(heatmap, occurences)
 
     labels = label(heatmap)
@@ -62,16 +53,19 @@ def apply_heat(image, bboxes, occurences):
     print("")
     log.info(str(labels[1]) + ' car(s) found')
     
-    # plt.imshow(labels[0], cmap='gray')
-    # plt.show()
-    
     # Draw bounding boxes on a copy of the image
     draw_img = draw_labeled_bboxes(np.copy(image), labels)
 
     final_map = np.clip(heatmap, 0, 255)
     
-    # plt.imshow(final_map, cmap='hot')
-    # plt.show()
+    debug = False
+    if (debug):
+        plt.imshow(heatmap, cmap='hot')
+        plt.show()
+        plt.imshow(labels[0], cmap='gray')
+        plt.show()
+        plt.imshow(final_map, cmap='hot')
+        plt.show()
     
     return draw_img, final_map
 
